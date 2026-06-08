@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Toaster } from '@/components/ui/sonner'
+import { BallLogo } from '@/components/BallLogo'
 
 const NAV = [
   { to: '/', label: 'Accueil' },
@@ -47,9 +48,9 @@ export function AppLayout() {
           <Link to="/" className="group mr-2 flex items-center gap-2">
             <span
               aria-hidden
-              className="grid size-8 place-items-center rounded-lg bg-primary text-base shadow-sm transition-transform group-hover:-rotate-6"
+              className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-6"
             >
-              ⚽
+              <BallLogo className="size-5 text-white" />
             </span>
             <span className="font-display text-festival text-2xl leading-none tracking-tight">
               six-cdm

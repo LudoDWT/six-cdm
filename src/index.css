@@ -178,6 +178,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* Curseur main sur les éléments interactifs (Tailwind v4 ne le met plus par défaut) */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
   body {
     @apply bg-background text-foreground;
     margin: 0;

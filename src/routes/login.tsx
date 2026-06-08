@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { BallLogo } from '@/components/BallLogo'
 
 export function LoginPage() {
   const { session, loading, signUp, signIn } = useAuth()
@@ -48,9 +49,9 @@ export function LoginPage() {
         <div className="mb-8 flex flex-col items-center gap-4">
           <span
             aria-hidden
-            className="grid size-16 place-items-center rounded-2xl bg-primary text-4xl shadow-lg shadow-primary/20"
+            className="grid size-16 place-items-center rounded-2xl bg-primary shadow-lg shadow-primary/20"
           >
-            ⚽
+            <BallLogo className="size-9 text-white" />
           </span>
           <div className="space-y-2">
             <p className="font-display text-sm tracking-[0.3em] text-accent">
