@@ -1,2 +1,5 @@
+# Config pnpm (mono-package). Exclusion de la règle minimumReleaseAge de pnpm 11
+# pour shadcn@4.11.0 (publié récemment, sinon l'install est bloquée par la
+# protection supply-chain qui rejette les paquets de moins de 24h).
 minimumReleaseAgeExclude:
   - shadcn@4.11.0
