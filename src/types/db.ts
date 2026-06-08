@@ -87,6 +87,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contributions: {
+        Row: {
+          amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "leaderboard"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           away_score: number | null

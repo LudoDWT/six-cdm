@@ -6,6 +6,8 @@ import { MatchsPage } from '@/routes/matchs'
 import { MatchDetailPage } from '@/routes/match.$id'
 import { ClassementPage } from '@/routes/classement'
 import { BonusPage } from '@/routes/bonus'
+import { CagnottePage } from '@/routes/cagnotte'
+import { ReglesPage } from '@/routes/regles'
 import { ProfilPage } from '@/routes/profil'
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> })
@@ -16,11 +18,22 @@ const matchsRoute = createRoute({ getParentRoute: () => appRoute, path: '/matchs
 const matchDetailRoute = createRoute({ getParentRoute: () => appRoute, path: '/match/$id', component: MatchDetailPage })
 const classementRoute = createRoute({ getParentRoute: () => appRoute, path: '/classement', component: ClassementPage })
 const bonusRoute = createRoute({ getParentRoute: () => appRoute, path: '/bonus', component: BonusPage })
+const cagnotteRoute = createRoute({ getParentRoute: () => appRoute, path: '/cagnotte', component: CagnottePage })
+const reglesRoute = createRoute({ getParentRoute: () => appRoute, path: '/regles', component: ReglesPage })
 const profilRoute = createRoute({ getParentRoute: () => appRoute, path: '/profil', component: ProfilPage })
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  appRoute.addChildren([indexRoute, matchsRoute, matchDetailRoute, classementRoute, bonusRoute, profilRoute]),
+  appRoute.addChildren([
+    indexRoute,
+    matchsRoute,
+    matchDetailRoute,
+    classementRoute,
+    bonusRoute,
+    cagnotteRoute,
+    reglesRoute,
+    profilRoute,
+  ]),
 ])
 
 export const router = createRouter({ routeTree, basepath: '/six-cdm' })

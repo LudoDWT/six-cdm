@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Lock, Minus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Flag } from '@/components/Flag'
 import { isLocked } from '@/lib/lock'
 import { cn } from '@/lib/utils'
 
@@ -27,7 +28,7 @@ function Stepper({
   disabled: boolean
 }) {
   const stepBtn =
-    'grid size-9 place-items-center rounded-full transition-colors disabled:opacity-30 disabled:hover:bg-transparent'
+    'grid size-8 place-items-center rounded-full transition-colors disabled:opacity-30 disabled:hover:bg-transparent'
   return (
     <div className="inline-flex items-center gap-0.5 rounded-full border border-border bg-background p-1 shadow-sm">
       <button
@@ -46,7 +47,7 @@ function Stepper({
         disabled={disabled}
         value={value}
         onChange={(e) => onChange(clamp(parseInt(e.target.value.replace(/\D/g, ''), 10)))}
-        className="w-9 bg-transparent text-center font-display text-2xl leading-none tabular-nums outline-none disabled:opacity-70"
+        className="w-8 bg-transparent text-center font-display text-2xl leading-none tabular-nums outline-none disabled:opacity-70"
       />
       <button
         type="button"
@@ -57,6 +58,16 @@ function Stepper({
       >
         <Plus className="size-4" />
       </button>
+    </div>
+  )
+}
+
+function TeamColumn({ team, children }: { team: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <Flag team={team} className="h-10 w-[3.5rem] shadow" />
+      <span className="line-clamp-2 text-sm font-semibold leading-tight">{team}</span>
+      {children}
     </div>
   )
 }
@@ -79,20 +90,26 @@ export function PredictionForm({
         e.preventDefault()
         onSubmit({ home, away })
       }}
-      className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/40 p-2.5"
+      className="space-y-4"
     >
-      <div className="flex items-center gap-2">
-        <Stepper label={homeTeam} value={home} onChange={setHome} disabled={locked} />
-        <span className="font-display text-lg text-muted-foreground">:</span>
-        <Stepper label={awayTeam} value={away} onChange={setAway} disabled={locked} />
+      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2">
+        <TeamColumn team={homeTeam}>
+          <Stepper label={homeTeam} value={home} onChange={setHome} disabled={locked} />
+        </TeamColumn>
+        <span className="self-center pt-10 font-display text-lg text-muted-foreground">:</span>
+        <TeamColumn team={awayTeam}>
+          <Stepper label={awayTeam} value={away} onChange={setAway} disabled={locked} />
+        </TeamColumn>
       </div>
       {locked ? (
-        <span className="inline-flex items-center gap-1.5 px-2 text-xs font-medium text-muted-foreground">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Lock className="size-3.5" />
           Verrouillé
-        </span>
+        </div>
       ) : (
-        <Button type="submit">Valider</Button>
+        <Button type="submit" className="w-full">
+          Valider mon prono
+        </Button>
       )}
     </form>
   )

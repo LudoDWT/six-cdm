@@ -13,6 +13,8 @@ const NAV = [
   { to: '/matchs', label: 'Matchs' },
   { to: '/classement', label: 'Classement' },
   { to: '/bonus', label: 'Bonus' },
+  { to: '/cagnotte', label: 'Cagnotte' },
+  { to: '/regles', label: 'Règles' },
   { to: '/profil', label: 'Profil' },
 ] as const
 
