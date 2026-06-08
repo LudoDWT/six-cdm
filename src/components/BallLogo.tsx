@@ -1,27 +1,27 @@
 import { cn } from '@/lib/utils'
 
-/** Ballon de foot stylisé, en trait (hérite de `currentColor`). */
+/**
+ * Ballon de foot reconnaissable : disque blanc, grand pentagone central foncé
+ * et coutures courtes (motif via `currentColor`). À poser sur un fond coloré.
+ */
 export function BallLogo({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      className={cn('size-5', className)}
-    >
-      <circle cx="12" cy="12" r="9.25" />
-      {/* pentagone central */}
-      <path d="M12 7.1l3.14 2.28-1.2 3.69H10.06l-1.2-3.69L12 7.1z" />
-      {/* coutures vers l'extérieur */}
-      <path d="M12 7.1V3.2" />
-      <path d="M15.14 9.38l3.5-1.16" />
-      <path d="M13.94 13.07l2.2 3.02" />
-      <path d="M10.06 13.07l-2.2 3.02" />
-      <path d="M8.86 9.38L5.36 8.22" />
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden className={cn('size-5', className)}>
+      <circle cx="16" cy="16" r="13" fill="white" />
+      {/* pentagone central foncé */}
+      <polygon
+        points="16,10 21.71,14.15 19.53,20.85 12.47,20.85 10.29,14.15"
+        fill="currentColor"
+      />
+      {/* coutures courtes vers les panneaux voisins */}
+      <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <line x1="16" y1="10" x2="16" y2="6.3" />
+        <line x1="21.71" y1="14.15" x2="24.7" y2="13.1" />
+        <line x1="19.53" y1="20.85" x2="21.4" y2="23.5" />
+        <line x1="12.47" y1="20.85" x2="10.6" y2="23.5" />
+        <line x1="10.29" y1="14.15" x2="7.3" y2="13.1" />
+      </g>
+      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="2" />
     </svg>
   )
 }

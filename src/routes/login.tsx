@@ -100,16 +100,13 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
-      {/* Bande de pelouse en bas */}
-      <div className="pitch-stripes pointer-events-none absolute inset-x-0 bottom-0 h-40 opacity-60" />
-
       <div className="relative z-10 w-full max-w-md text-center">
         <div className="mb-8 flex flex-col items-center gap-4">
           <span
             aria-hidden
-            className="grid size-16 place-items-center rounded-2xl bg-primary shadow-lg shadow-primary/20"
+            className="grid size-20 place-items-center rounded-full bg-primary shadow-xl shadow-primary/25 ring-1 ring-primary/20"
           >
-            <BallLogo className="size-9 text-white" />
+            <BallLogo className="size-12 text-[#0b3a2a]" />
           </span>
           <div className="space-y-2">
             <p className="font-display text-sm tracking-[0.3em] text-accent">

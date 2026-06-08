@@ -50,15 +50,15 @@
 
   /* Accents festifs réutilisables */
   --festival-orange: oklch(0.72 0.18 55);
-  --festival-magenta: oklch(0.6 0.23 5);
-  --festival-gold: oklch(0.82 0.15 85);
+  --festival-amber: oklch(0.79 0.15 75);
+  --festival-gold: oklch(0.85 0.14 90);
   --pitch: oklch(0.52 0.16 152);
   --pitch-bright: oklch(0.62 0.17 150);
 
   --chart-1: oklch(0.52 0.16 152);
   --chart-2: oklch(0.72 0.18 55);
-  --chart-3: oklch(0.6 0.23 5);
-  --chart-4: oklch(0.82 0.15 85);
+  --chart-3: oklch(0.79 0.15 75);
+  --chart-4: oklch(0.85 0.14 90);
   --chart-5: oklch(0.45 0.1 230);
 
   --radius: 0.75rem;
@@ -102,15 +102,15 @@
   --ring: oklch(0.7 0.16 150);
 
   --festival-orange: oklch(0.76 0.18 55);
-  --festival-magenta: oklch(0.66 0.23 5);
-  --festival-gold: oklch(0.84 0.15 85);
+  --festival-amber: oklch(0.8 0.15 75);
+  --festival-gold: oklch(0.86 0.14 90);
   --pitch: oklch(0.7 0.16 150);
   --pitch-bright: oklch(0.76 0.16 148);
 
   --chart-1: oklch(0.7 0.16 150);
   --chart-2: oklch(0.76 0.18 55);
-  --chart-3: oklch(0.66 0.23 5);
-  --chart-4: oklch(0.84 0.15 85);
+  --chart-3: oklch(0.8 0.15 75);
+  --chart-4: oklch(0.86 0.14 90);
   --chart-5: oklch(0.6 0.12 230);
 
   --sidebar: oklch(0.19 0.025 158);
@@ -129,7 +129,7 @@
   --font-sans: 'Archivo Variable', 'Geist Variable', system-ui, sans-serif;
 
   --color-festival-orange: var(--festival-orange);
-  --color-festival-magenta: var(--festival-magenta);
+  --color-festival-amber: var(--festival-amber);
   --color-festival-gold: var(--festival-gold);
   --color-pitch: var(--pitch);
   --color-pitch-bright: var(--pitch-bright);
@@ -192,25 +192,35 @@
   body {
     @apply bg-background text-foreground;
     margin: 0;
-    /* Texture festive subtile : halos chauds + grain léger */
+    /* Atmosphère « stade au soleil » : halos doux vert + or + une fine trame de points */
     background-image:
       radial-gradient(
-        38rem 38rem at 12% -8%,
-        color-mix(in oklch, var(--festival-orange) 16%, transparent),
-        transparent
+        46rem 46rem at 4% -14%,
+        color-mix(in oklch, var(--pitch) 16%, transparent),
+        transparent 70%
       ),
       radial-gradient(
-        34rem 34rem at 96% 4%,
-        color-mix(in oklch, var(--festival-magenta) 12%, transparent),
-        transparent
+        40rem 40rem at 102% -6%,
+        color-mix(in oklch, var(--festival-gold) 18%, transparent),
+        transparent 68%
       ),
       radial-gradient(
-        40rem 40rem at 50% 120%,
-        color-mix(in oklch, var(--pitch) 14%, transparent),
-        transparent
+        44rem 44rem at 50% 122%,
+        color-mix(in oklch, var(--accent) 10%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        circle,
+        color-mix(in oklch, var(--foreground) 4%, transparent) 1px,
+        transparent 1.5px
       );
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      24px 24px;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+    background-attachment: fixed, fixed, fixed, fixed;
   }
   html {
     @apply font-sans;
@@ -230,29 +240,35 @@
   .festival-rule {
     background-image: linear-gradient(
       90deg,
-      var(--festival-orange),
-      var(--festival-magenta) 45%,
-      var(--pitch) 100%
+      var(--pitch),
+      var(--festival-gold) 50%,
+      var(--accent) 100%
     );
   }
-  /* Texte dégradé festif pour le wordmark */
+  /* Texte dégradé festif pour le wordmark (soleil → or → pelouse, sans rouge) */
   .text-festival {
     background-image: linear-gradient(
       100deg,
-      var(--festival-orange),
-      var(--festival-magenta) 55%,
+      var(--accent),
+      var(--festival-gold) 48%,
       var(--pitch-bright) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-  /* Bandeau de pelouse (effet pitch stripes) très subtil */
-  .pitch-stripes {
-    background-image: repeating-linear-gradient(
-      135deg,
-      color-mix(in oklch, var(--pitch) 10%, transparent) 0 14px,
-      transparent 14px 28px
-    );
+  /* Halo de profondeur pour les panneaux verts (héros) */
+  .field-glow {
+    background-image:
+      radial-gradient(
+        60% 90% at 82% 6%,
+        color-mix(in oklch, white 18%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 85% at 0% 100%,
+        color-mix(in oklch, black 16%, transparent),
+        transparent 72%
+      );
   }
 }

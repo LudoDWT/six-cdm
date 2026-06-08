@@ -48,9 +48,9 @@ export function AppLayout() {
           <Link to="/" className="group mr-2 flex items-center gap-2">
             <span
               aria-hidden
-              className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-6"
+              className="grid size-8 place-items-center rounded-full bg-primary shadow-sm ring-1 ring-primary/20 transition-transform group-hover:-rotate-12"
             >
-              <BallLogo className="size-5 text-white" />
+              <BallLogo className="size-6 text-[#0b3a2a]" />
             </span>
             <span className="font-display text-festival text-2xl leading-none tracking-tight">
               six-cdm

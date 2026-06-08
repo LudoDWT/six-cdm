@@ -63,7 +63,7 @@ export function MatchDetailPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground">
-        <div className="pitch-stripes pointer-events-none absolute inset-0 opacity-25" />
+        <div className="field-glow pointer-events-none absolute inset-0" />
         <div className="relative z-10 space-y-2">
           <Badge className="bg-primary-foreground/15 text-primary-foreground">
             {matchStageLabel(match.stage, match.group_name)}

@@ -41,7 +41,7 @@ export function DashboardPage() {
     <div className="space-y-8">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
-        <div className="pitch-stripes pointer-events-none absolute inset-0 opacity-30" />
+        <div className="field-glow pointer-events-none absolute inset-0" />
         <div className="relative z-10">
           <p className="font-display text-xs tracking-[0.25em] text-primary-foreground/70">
             TABLEAU DE BORD
