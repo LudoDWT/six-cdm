@@ -78,7 +78,10 @@ export function ProfilPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Profil</h1>
+      <div>
+        <h1 className="font-display text-4xl leading-none">Profil</h1>
+        <div className="festival-rule mt-2 h-1 w-16 rounded-full" />
+      </div>
 
       <Card>
         <CardHeader>
@@ -122,19 +125,19 @@ export function ProfilPage() {
             <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div className="space-y-1">
                 <dt className="text-sm text-muted-foreground">Total</dt>
-                <dd className="text-2xl font-bold">{myRow.total_points ?? 0}</dd>
+                <dd className="font-display text-3xl leading-none">{myRow.total_points ?? 0}</dd>
               </div>
               <div className="space-y-1">
                 <dt className="text-sm text-muted-foreground">Matchs</dt>
-                <dd className="text-2xl font-bold">{myRow.match_points ?? 0}</dd>
+                <dd className="font-display text-3xl leading-none">{myRow.match_points ?? 0}</dd>
               </div>
               <div className="space-y-1">
                 <dt className="text-sm text-muted-foreground">Bonus</dt>
-                <dd className="text-2xl font-bold">{myRow.bonus_points ?? 0}</dd>
+                <dd className="font-display text-3xl leading-none">{myRow.bonus_points ?? 0}</dd>
               </div>
               <div className="space-y-1">
                 <dt className="text-sm text-muted-foreground">Scores exacts</dt>
-                <dd className="text-2xl font-bold">{myRow.exact_count ?? 0}</dd>
+                <dd className="font-display text-3xl leading-none">{myRow.exact_count ?? 0}</dd>
               </div>
             </dl>
           </CardContent>

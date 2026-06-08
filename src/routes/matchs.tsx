@@ -4,25 +4,30 @@ import { usePredictions, useUpsertPrediction } from '@/hooks/usePredictions'
 import { useAuth } from '@/hooks/useAuth'
 import { useUIStore } from '@/stores/ui'
 import { MatchCard } from '@/components/MatchCard'
+import { stageLabel } from '@/lib/stages'
 import type { Stage } from '@/types/match'
 import type { Tables } from '@/types/db'
 
+const STAGES: Stage[] = [
+  'group',
+  'round_of_32',
+  'round_of_16',
+  'quarter',
+  'semi',
+  'third_place',
+  'final',
+]
+
 const STAGE_OPTIONS: { value: Stage | 'all'; label: string }[] = [
   { value: 'all', label: 'Toutes les phases' },
-  { value: 'group', label: 'Phase de groupes' },
-  { value: 'round_of_32', label: '32es de finale' },
-  { value: 'round_of_16', label: '8es de finale' },
-  { value: 'quarter', label: 'Quarts de finale' },
-  { value: 'semi', label: 'Demi-finales' },
-  { value: 'third_place', label: 'Petite finale' },
-  { value: 'final', label: 'Finale' },
+  ...STAGES.map((s) => ({ value: s, label: stageLabel(s) })),
 ]
 
 const GROUP_OPTIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
 export function MatchsPage() {
   const { data: matches, isLoading: matchesLoading, error: matchesError } = useMatches()
-  const { data: predictions, isLoading: predsLoading } = usePredictions()
+  const { data: predictions, isLoading: predsLoading, error: predsError } = usePredictions()
   const { session } = useAuth()
   const upsert = useUpsertPrediction()
 
@@ -32,7 +37,7 @@ export function MatchsPage() {
     return <div className="text-muted-foreground">Chargement…</div>
   }
 
-  if (matchesError) {
+  if (matchesError || predsError) {
     return <div className="text-destructive">Erreur lors du chargement des matchs.</div>
   }
 
@@ -61,8 +66,11 @@ export function MatchsPage() {
   const showGroupFilter = stageFilter === 'all' || stageFilter === 'group'
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Matchs</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="font-display text-4xl leading-none">Matchs</h1>
+        <div className="festival-rule mt-2 h-1 w-16 rounded-full" />
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
@@ -114,7 +122,10 @@ export function MatchsPage() {
                     away_score: s.away,
                   },
                   {
-                    onSuccess: () => toast.success('Prono enregistré'),
+                    onSuccess: () =>
+                      toast.success('Prono enregistré ⚽', {
+                        description: `${match.home_team} vs ${match.away_team}`,
+                      }),
                     onError: (err) =>
                       toast.error(`Erreur : ${err instanceof Error ? err.message : 'inconnue'}`),
                   },

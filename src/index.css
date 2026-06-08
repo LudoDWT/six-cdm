@@ -2,81 +2,138 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/archivo";
+@import "@fontsource/anton";
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  six-cdm — Direction artistique « Stade en fête »
+  Coupe du Monde 2026 (USA · Mexique · Canada)
+  - Fond crème lumineux (lumière de stade en plein jour)
+  - Primary : vert pelouse profond
+  - Accents festifs : orange coucher de soleil, magenta, or
+  - Display : Anton (bannière de stade) / Body : Archivo
+  Light-only par défaut (le dark reste cohérent si .dark est posé).
+*/
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Crème chaud, légèrement doré */
+  --background: oklch(0.985 0.012 88);
+  --foreground: oklch(0.22 0.03 150);
+
+  --card: oklch(1 0.004 95);
+  --card-foreground: oklch(0.22 0.03 150);
+  --popover: oklch(1 0.004 95);
+  --popover-foreground: oklch(0.22 0.03 150);
+
+  /* Vert pelouse profond */
+  --primary: oklch(0.52 0.16 152);
+  --primary-foreground: oklch(0.99 0.01 110);
+
+  /* Secondaire : crème un peu plus saturé */
+  --secondary: oklch(0.95 0.03 95);
+  --secondary-foreground: oklch(0.3 0.05 150);
+
+  --muted: oklch(0.955 0.018 95);
+  --muted-foreground: oklch(0.5 0.03 140);
+
+  /* Accent : orange coucher de soleil */
+  --accent: oklch(0.72 0.18 55);
+  --accent-foreground: oklch(0.98 0.02 90);
+
+  --destructive: oklch(0.58 0.22 27);
+
+  --border: oklch(0.9 0.02 95);
+  --input: oklch(0.91 0.018 95);
+  --ring: oklch(0.52 0.16 152);
+
+  /* Accents festifs réutilisables */
+  --festival-orange: oklch(0.72 0.18 55);
+  --festival-magenta: oklch(0.6 0.23 5);
+  --festival-gold: oklch(0.82 0.15 85);
+  --pitch: oklch(0.52 0.16 152);
+  --pitch-bright: oklch(0.62 0.17 150);
+
+  --chart-1: oklch(0.52 0.16 152);
+  --chart-2: oklch(0.72 0.18 55);
+  --chart-3: oklch(0.6 0.23 5);
+  --chart-4: oklch(0.82 0.15 85);
+  --chart-5: oklch(0.45 0.1 230);
+
+  --radius: 0.75rem;
+
+  --sidebar: oklch(0.985 0.012 88);
+  --sidebar-foreground: oklch(0.22 0.03 150);
+  --sidebar-primary: oklch(0.52 0.16 152);
+  --sidebar-primary-foreground: oklch(0.99 0.01 110);
+  --sidebar-accent: oklch(0.72 0.18 55);
+  --sidebar-accent-foreground: oklch(0.98 0.02 90);
+  --sidebar-border: oklch(0.9 0.02 95);
+  --sidebar-ring: oklch(0.52 0.16 152);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Nuit de stade : vert très sombre, lumières chaudes */
+  --background: oklch(0.19 0.025 158);
+  --foreground: oklch(0.96 0.012 95);
+
+  --card: oklch(0.23 0.028 158);
+  --card-foreground: oklch(0.96 0.012 95);
+  --popover: oklch(0.23 0.028 158);
+  --popover-foreground: oklch(0.96 0.012 95);
+
+  --primary: oklch(0.7 0.16 150);
+  --primary-foreground: oklch(0.16 0.03 158);
+
+  --secondary: oklch(0.28 0.03 158);
+  --secondary-foreground: oklch(0.96 0.012 95);
+
+  --muted: oklch(0.27 0.025 158);
+  --muted-foreground: oklch(0.72 0.02 120);
+
+  --accent: oklch(0.74 0.18 55);
+  --accent-foreground: oklch(0.18 0.04 60);
+
+  --destructive: oklch(0.7 0.19 22);
+
+  --border: oklch(0.96 0.02 95 / 12%);
+  --input: oklch(0.96 0.02 95 / 16%);
+  --ring: oklch(0.7 0.16 150);
+
+  --festival-orange: oklch(0.76 0.18 55);
+  --festival-magenta: oklch(0.66 0.23 5);
+  --festival-gold: oklch(0.84 0.15 85);
+  --pitch: oklch(0.7 0.16 150);
+  --pitch-bright: oklch(0.76 0.16 148);
+
+  --chart-1: oklch(0.7 0.16 150);
+  --chart-2: oklch(0.76 0.18 55);
+  --chart-3: oklch(0.66 0.23 5);
+  --chart-4: oklch(0.84 0.15 85);
+  --chart-5: oklch(0.6 0.12 230);
+
+  --sidebar: oklch(0.19 0.025 158);
+  --sidebar-foreground: oklch(0.96 0.012 95);
+  --sidebar-primary: oklch(0.7 0.16 150);
+  --sidebar-primary-foreground: oklch(0.16 0.03 158);
+  --sidebar-accent: oklch(0.74 0.18 55);
+  --sidebar-accent-foreground: oklch(0.18 0.04 60);
+  --sidebar-border: oklch(0.96 0.02 95 / 12%);
+  --sidebar-ring: oklch(0.7 0.16 150);
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-display: 'Anton', system-ui, sans-serif;
+  --font-heading: 'Archivo Variable', system-ui, sans-serif;
+  --font-sans: 'Archivo Variable', 'Geist Variable', system-ui, sans-serif;
+
+  --color-festival-orange: var(--festival-orange);
+  --color-festival-magenta: var(--festival-magenta);
+  --color-festival-gold: var(--festival-gold);
+  --color-pitch: var(--pitch);
+  --color-pitch-bright: var(--pitch-bright);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -124,8 +181,67 @@
   body {
     @apply bg-background text-foreground;
     margin: 0;
+    /* Texture festive subtile : halos chauds + grain léger */
+    background-image:
+      radial-gradient(
+        38rem 38rem at 12% -8%,
+        color-mix(in oklch, var(--festival-orange) 16%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        34rem 34rem at 96% 4%,
+        color-mix(in oklch, var(--festival-magenta) 12%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        40rem 40rem at 50% 120%,
+        color-mix(in oklch, var(--pitch) 14%, transparent),
+        transparent
+      );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Titres d'affichage : Anton, large interlettrage, allure de bannière */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  /* Soulignage festif sous les titres de section */
+  .festival-rule {
+    background-image: linear-gradient(
+      90deg,
+      var(--festival-orange),
+      var(--festival-magenta) 45%,
+      var(--pitch) 100%
+    );
+  }
+  /* Texte dégradé festif pour le wordmark */
+  .text-festival {
+    background-image: linear-gradient(
+      100deg,
+      var(--festival-orange),
+      var(--festival-magenta) 55%,
+      var(--pitch-bright) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Bandeau de pelouse (effet pitch stripes) très subtil */
+  .pitch-stripes {
+    background-image: repeating-linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--pitch) 10%, transparent) 0 14px,
+      transparent 14px 28px
+    );
   }
 }

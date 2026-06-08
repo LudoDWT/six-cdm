@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Lock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { isLocked } from '@/lib/lock'
@@ -23,13 +24,14 @@ export function PredictionForm({
   const locked = isLocked(kickoffIso)
   const [home, setHome] = useState(defaultHome ?? 0)
   const [away, setAway] = useState(defaultAway ?? 0)
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
         onSubmit({ home, away })
       }}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 rounded-lg bg-secondary/50 p-2"
     >
       <Input
         aria-label={`Score ${homeTeam}`}
@@ -38,9 +40,9 @@ export function PredictionForm({
         value={home}
         disabled={locked}
         onChange={(e) => setHome(Number(e.target.value))}
-        className="w-16"
+        className="h-9 w-14 text-center font-display text-lg tabular-nums"
       />
-      <span>-</span>
+      <span className="font-display text-muted-foreground">-</span>
       <Input
         aria-label={`Score ${awayTeam}`}
         type="number"
@@ -48,11 +50,18 @@ export function PredictionForm({
         value={away}
         disabled={locked}
         onChange={(e) => setAway(Number(e.target.value))}
-        className="w-16"
+        className="h-9 w-14 text-center font-display text-lg tabular-nums"
       />
-      <Button type="submit" disabled={locked}>
-        Valider
-      </Button>
+      {locked ? (
+        <span className="ml-auto inline-flex items-center gap-1.5 px-2 text-xs font-medium text-muted-foreground">
+          <Lock className="size-3.5" />
+          Verrouillé
+        </span>
+      ) : (
+        <Button type="submit" disabled={locked} className="ml-auto">
+          Valider
+        </Button>
+      )}
     </form>
   )
 }

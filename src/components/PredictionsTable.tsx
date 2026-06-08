@@ -31,7 +31,7 @@ const isFinished = (match: Tables<'matches'>) =>
   match.home_score !== null && match.away_score !== null
 
 export function PredictionsTable({ matchId, match }: Props) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['predictions', matchId, 'withProfiles'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,43 +49,63 @@ export function PredictionsTable({ matchId, match }: Props) {
     return <div className="text-sm text-muted-foreground">Chargement des pronos…</div>
   }
 
+  if (isError) {
+    return <div className="text-sm text-destructive">Erreur lors du chargement des pronos.</div>
+  }
+
   if (!data || data.length === 0) {
     return <div className="text-sm text-muted-foreground">Aucun prono pour ce match.</div>
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Joueur</TableHead>
-          <TableHead>Prono</TableHead>
-          {finished && <TableHead>Points</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((pred) => {
-          const points = finished
-            ? computePoints(
-                { h: pred.home_score, a: pred.away_score },
-                { h: match.home_score!, a: match.away_score! },
-              )
-            : null
+    <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-border/60 hover:bg-transparent">
+            <TableHead>Joueur</TableHead>
+            <TableHead className="text-center">Prono</TableHead>
+            {finished && <TableHead className="text-right">Points</TableHead>}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((pred) => {
+            const points = finished
+              ? computePoints(
+                  { h: pred.home_score, a: pred.away_score },
+                  { h: match.home_score!, a: match.away_score! },
+                )
+              : null
 
-          return (
-            <TableRow key={pred.id}>
-              <TableCell>{pred.profiles?.display_name ?? pred.user_id}</TableCell>
-              <TableCell>
-                {pred.home_score} – {pred.away_score}
-              </TableCell>
-              {finished && (
-                <TableCell>
-                  {points !== null ? `+${points} pts` : '—'}
+            return (
+              <TableRow key={pred.id} className="border-border/50">
+                <TableCell>{pred.profiles?.display_name ?? pred.user_id}</TableCell>
+                <TableCell className="text-center font-display tabular-nums">
+                  {pred.home_score}-{pred.away_score}
                 </TableCell>
-              )}
-            </TableRow>
-          )
-        })}
-      </TableBody>
-    </Table>
+                {finished && (
+                  <TableCell className="text-right tabular-nums">
+                    {points !== null ? (
+                      <span
+                        className={
+                          points === 3
+                            ? 'font-semibold text-primary'
+                            : points === 1
+                              ? 'text-festival-orange'
+                              : 'text-muted-foreground'
+                        }
+                      >
+                        +{points} pts
+                      </span>
+                    ) : (
+                      '—'
+                    )}
+                  </TableCell>
+                )}
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

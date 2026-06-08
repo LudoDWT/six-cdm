@@ -25,7 +25,7 @@ function BonusQuestionCard({
     upsert.mutate(
       { user_id: userId, bonus_question_id: question.id, answer },
       {
-        onSuccess: () => toast.success('Réponse enregistrée'),
+        onSuccess: () => toast.success('Réponse enregistrée 🎯'),
         onError: (err) =>
           toast.error(`Erreur : ${err instanceof Error ? err.message : 'inconnue'}`),
       },
@@ -37,7 +37,7 @@ function BonusQuestionCard({
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">{question.label}</CardTitle>
-          <Badge variant="secondary">{question.points} pts</Badge>
+          <Badge className="bg-festival-gold font-display text-foreground">+{question.points} pts</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -102,8 +102,14 @@ export function BonusPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Questions Bonus</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="font-display text-4xl leading-none">Questions Bonus</h1>
+        <div className="festival-rule mt-2 h-1 w-16 rounded-full" />
+        <p className="mt-2 text-sm text-muted-foreground">
+          Des points en plus pour les pronos audacieux. 🎯
+        </p>
+      </div>
       {(questions ?? []).length === 0 ? (
         <p className="text-muted-foreground">Aucune question bonus pour l'instant.</p>
       ) : (

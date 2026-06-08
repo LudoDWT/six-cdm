@@ -7,16 +7,8 @@ import { PredictionForm } from '@/components/PredictionForm'
 import { PredictionsTable } from '@/components/PredictionsTable'
 import { Badge } from '@/components/ui/badge'
 import { computePoints } from '@/lib/scoring'
-
-const STAGE_LABELS: Record<string, string> = {
-  group: 'Phase de groupes',
-  round_of_32: '32es de finale',
-  round_of_16: '8es de finale',
-  quarter: 'Quarts de finale',
-  semi: 'Demi-finales',
-  third_place: 'Petite finale',
-  final: 'Finale',
-}
+import { matchStageLabel } from '@/lib/stages'
+import { teamFlag } from '@/lib/flags'
 
 function formatKickoff(iso: string): string {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -30,16 +22,20 @@ function formatKickoff(iso: string): string {
 }
 
 export function MatchDetailPage() {
-  const params = useParams({ strict: false })
-  const matchId = Number((params as Record<string, string>).id)
+  const params = useParams({ from: '/app/match/$id' })
+  const matchId = Number(params.id)
 
-  const { data: matches, isLoading: matchesLoading } = useMatches()
-  const { data: predictions, isLoading: predsLoading } = usePredictions()
+  const { data: matches, isLoading: matchesLoading, error: matchesError } = useMatches()
+  const { data: predictions, isLoading: predsLoading, error: predsError } = usePredictions()
   const { session } = useAuth()
   const upsert = useUpsertPrediction()
 
   if (matchesLoading || predsLoading) {
     return <div className="text-muted-foreground">Chargement…</div>
+  }
+
+  if (matchesError || predsError) {
+    return <div className="text-destructive">Erreur lors du chargement du match.</div>
   }
 
   const match = matches?.find((m) => m.id === matchId)
@@ -66,31 +62,38 @@ export function MatchDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">
-            {match.home_team} vs {match.away_team}
-          </h1>
-          <Badge variant="secondary">
-            {match.stage === 'group' && match.group_name
-              ? `Groupe ${match.group_name}`
-              : (STAGE_LABELS[match.stage] ?? match.stage)}
+      <div className="relative overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground">
+        <div className="pitch-stripes pointer-events-none absolute inset-0 opacity-25" />
+        <div className="relative z-10 space-y-2">
+          <Badge className="bg-primary-foreground/15 text-primary-foreground">
+            {matchStageLabel(match.stage, match.group_name)}
           </Badge>
+          <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-3xl leading-none sm:text-4xl">
+            <span className="inline-flex items-center gap-2">
+              {teamFlag(match.home_team) && <span aria-hidden>{teamFlag(match.home_team)}</span>}
+              {match.home_team}
+            </span>
+            <span className="text-primary-foreground/60">vs</span>
+            <span className="inline-flex items-center gap-2">
+              {teamFlag(match.away_team) && <span aria-hidden>{teamFlag(match.away_team)}</span>}
+              {match.away_team}
+            </span>
+          </h1>
+          <p className="text-sm text-primary-foreground/80">
+            {formatKickoff(match.kickoff_at)} · 📍 {match.venue}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {formatKickoff(match.kickoff_at)} — {match.venue}
-        </p>
       </div>
 
       {/* Result or prediction form */}
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Mon prono</h2>
+        <h2 className="font-display text-2xl">Mon prono</h2>
 
         {finished ? (
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-xl font-bold">
-                Résultat : {match.home_score} – {match.away_score}
+              <span className="font-display text-2xl">
+                Résultat : {match.home_score}-{match.away_score}
               </span>
             </div>
             {myPrediction ? (
@@ -125,7 +128,7 @@ export function MatchDetailPage() {
                   away_score: s.away,
                 },
                 {
-                  onSuccess: () => toast.success('Prono enregistré'),
+                  onSuccess: () => toast.success('Prono enregistré ⚽'),
                   onError: (err) =>
                     toast.error(`Erreur : ${err instanceof Error ? err.message : 'inconnue'}`),
                 },
@@ -137,7 +140,7 @@ export function MatchDetailPage() {
 
       {/* All predictions */}
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Pronos des joueurs</h2>
+        <h2 className="font-display text-2xl">Pronos des joueurs</h2>
         <PredictionsTable matchId={matchId} match={match} />
       </section>
     </div>

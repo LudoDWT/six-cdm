@@ -15,8 +15,11 @@ export function ClassementPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Classement</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="font-display text-4xl leading-none">Classement</h1>
+        <div className="festival-rule mt-2 h-1 w-16 rounded-full" />
+      </div>
       <LeaderboardTable rows={data ?? []} currentUserId={session?.user.id} />
     </div>
   )

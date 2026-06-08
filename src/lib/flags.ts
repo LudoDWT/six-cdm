@@ -1,0 +1,60 @@
+/**
+ * Drapeaux emoji par nom d'équipe (FR), pour les équipes qualifiées de la CDM 2026.
+ * Les libellés de placeholder de phase finale (« 1er Groupe A », « Vainqueur M73 »,
+ * « 3e (A/B/...) », « Perdant M101 »…) n'ont pas de drapeau → on renvoie undefined.
+ */
+const FLAGS: Record<string, string> = {
+  'Afrique du Sud': '🇿🇦',
+  Algérie: '🇩🇿',
+  Allemagne: '🇩🇪',
+  Angleterre: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Arabie Saoudite': '🇸🇦',
+  Argentine: '🇦🇷',
+  Australie: '🇦🇺',
+  Autriche: '🇦🇹',
+  Belgique: '🇧🇪',
+  'Bosnie-Herzégovine': '🇧🇦',
+  Brésil: '🇧🇷',
+  Canada: '🇨🇦',
+  'Cap-Vert': '🇨🇻',
+  Colombie: '🇨🇴',
+  Croatie: '🇭🇷',
+  Curaçao: '🇨🇼',
+  "Côte d'Ivoire": '🇨🇮',
+  Espagne: '🇪🇸',
+  France: '🇫🇷',
+  Ghana: '🇬🇭',
+  Haïti: '🇭🇹',
+  Irak: '🇮🇶',
+  Iran: '🇮🇷',
+  Japon: '🇯🇵',
+  Jordanie: '🇯🇴',
+  Maroc: '🇲🇦',
+  Mexique: '🇲🇽',
+  Norvège: '🇳🇴',
+  'Nouvelle-Zélande': '🇳🇿',
+  Ouzbékistan: '🇺🇿',
+  Panamá: '🇵🇦',
+  Paraguay: '🇵🇾',
+  'Pays-Bas': '🇳🇱',
+  Portugal: '🇵🇹',
+  Qatar: '🇶🇦',
+  'RD Congo': '🇨🇩',
+  'République de Corée': '🇰🇷',
+  Suisse: '🇨🇭',
+  Suède: '🇸🇪',
+  Sénégal: '🇸🇳',
+  Tchéquie: '🇨🇿',
+  Tunisie: '🇹🇳',
+  Turquie: '🇹🇷',
+  Uruguay: '🇺🇾',
+  Écosse: '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  Égypte: '🇪🇬',
+  Équateur: '🇪🇨',
+  'États-Unis': '🇺🇸',
+}
+
+/** Renvoie l'emoji drapeau d'une équipe, ou undefined pour un placeholder. */
+export function teamFlag(team: string): string | undefined {
+  return FLAGS[team]
+}

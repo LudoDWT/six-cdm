@@ -1,31 +1,17 @@
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Countdown } from '@/components/Countdown'
 import { PredictionForm } from '@/components/PredictionForm'
 import { computePoints } from '@/lib/scoring'
+import { matchStageLabel } from '@/lib/stages'
+import { teamFlag } from '@/lib/flags'
+import { cn } from '@/lib/utils'
 import type { Tables } from '@/types/db'
 
 interface Props {
   match: Tables<'matches'>
   prediction?: Tables<'predictions'> | null
   onSubmit: (s: { home: number; away: number }) => void
-}
-
-const STAGE_LABELS: Record<string, string> = {
-  group: '', // handled via group_name
-  round_of_32: '32es',
-  round_of_16: '8es',
-  quarter: 'Quart',
-  semi: 'Demie',
-  third_place: 'Petite finale',
-  final: 'Finale',
-}
-
-function stageBadgeLabel(match: Tables<'matches'>): string {
-  if (match.stage === 'group' && match.group_name) {
-    return `Groupe ${match.group_name}`
-  }
-  return STAGE_LABELS[match.stage] ?? match.stage
 }
 
 function formatKickoff(iso: string): string {
@@ -41,6 +27,32 @@ function formatKickoff(iso: string): string {
 const isFinished = (match: Tables<'matches'>) =>
   match.home_score !== null && match.away_score !== null
 
+function TeamName({ name, align }: { name: string; align: 'start' | 'end' }) {
+  const flag = teamFlag(name)
+  return (
+    <div
+      className={cn(
+        'flex min-w-0 items-center gap-2',
+        align === 'end' && 'flex-row-reverse text-right',
+      )}
+    >
+      {flag ? (
+        <span aria-hidden className="text-2xl leading-none">
+          {flag}
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          className="grid size-6 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground"
+        >
+          ?
+        </span>
+      )}
+      <span className="truncate text-sm font-semibold leading-tight">{name}</span>
+    </div>
+  )
+}
+
 export function MatchCard({ match, prediction, onSubmit }: Props) {
   const finished = isFinished(match)
 
@@ -53,32 +65,57 @@ export function MatchCard({ match, prediction, onSubmit }: Props) {
       : null
 
   return (
-    <Card>
+    <Card className="group/match transition-shadow hover:shadow-lg hover:shadow-primary/5">
       <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base">
-            {match.home_team} vs {match.away_team}
-          </CardTitle>
-          <Badge variant="secondary">{stageBadgeLabel(match)}</Badge>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {finished ? formatKickoff(match.kickoff_at) : <Countdown kickoffIso={match.kickoff_at} />}
+        <div className="flex items-center justify-between gap-2">
+          <Badge variant="secondary" className="font-medium">
+            {matchStageLabel(match.stage, match.group_name)}
+          </Badge>
+          <span className="text-xs font-medium text-muted-foreground">
+            {finished ? (
+              <span className="inline-flex items-center gap-1 text-primary">
+                <span className="size-1.5 rounded-full bg-primary" />
+                Terminé
+              </span>
+            ) : (
+              <Countdown kickoffIso={match.kickoff_at} />
+            )}
+          </span>
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Équipe vs équipe */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <TeamName name={match.home_team} align="start" />
+          {finished ? (
+            <div className="flex flex-col items-center px-1">
+              <span className="font-display text-2xl tabular-nums leading-none">
+                {match.home_score}-{match.away_score}
+              </span>
+            </div>
+          ) : (
+            <span className="font-display text-sm text-muted-foreground">vs</span>
+          )}
+          <TeamName name={match.away_team} align="end" />
+        </div>
+
         {finished ? (
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-semibold">
-              {match.home_score} – {match.away_score}
-            </span>
-            {prediction != null && points !== null && (
-              <Badge variant={points === 3 ? 'default' : points === 1 ? 'outline' : 'secondary'}>
+          <div className="flex items-center justify-between border-t border-border/60 pt-3">
+            <span className="text-xs text-muted-foreground">{formatKickoff(match.kickoff_at)}</span>
+            {prediction != null && points !== null ? (
+              <Badge
+                className={cn(
+                  'font-display tabular-nums',
+                  points === 3 && 'bg-primary text-primary-foreground',
+                  points === 1 && 'bg-festival-gold text-foreground',
+                  points === 0 && 'bg-muted text-muted-foreground',
+                )}
+              >
                 +{points} pts
               </Badge>
-            )}
-            {prediction == null && (
-              <span className="text-sm text-muted-foreground">Aucun prono</span>
+            ) : (
+              <span className="text-xs text-muted-foreground">Aucun prono</span>
             )}
           </div>
         ) : (
@@ -94,8 +131,8 @@ export function MatchCard({ match, prediction, onSubmit }: Props) {
       </CardContent>
 
       {!finished && (
-        <CardFooter>
-          <span className="text-xs text-muted-foreground">{match.venue}</span>
+        <CardFooter className="text-xs text-muted-foreground">
+          <span className="truncate">📍 {match.venue}</span>
         </CardFooter>
       )}
     </Card>
