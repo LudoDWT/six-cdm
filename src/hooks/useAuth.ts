@@ -15,12 +15,17 @@ export function useAuth() {
     return () => sub.subscription.unsubscribe()
   }, [])
 
-  const signInWithGoogle = () =>
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/six-cdm/` },
+  const signUp = (email: string, password: string, displayName: string) =>
+    supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: displayName } },
     })
+
+  const signIn = (email: string, password: string) =>
+    supabase.auth.signInWithPassword({ email, password })
+
   const signOut = () => supabase.auth.signOut()
 
-  return { session, loading, signInWithGoogle, signOut }
+  return { session, loading, signUp, signIn, signOut }
 }

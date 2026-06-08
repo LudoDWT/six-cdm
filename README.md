@@ -10,7 +10,7 @@ bonus « tournoi » (vainqueur, meilleur buteur…) complètent le jeu.
 - **Vite + React + TypeScript**
 - **TanStack Router** (routing) + **TanStack Query** (état serveur)
 - **Zustand** (état UI)
-- **Supabase** (Postgres + Auth Google + RLS)
+- **Supabase** (Postgres + Auth email/mot de passe + RLS)
 - **Tailwind CSS v4 + shadcn/ui**
 - **GitHub Actions → GitHub Pages** (déploiement)
 
@@ -80,16 +80,16 @@ par GitHub Actions (`.github/workflows/deploy.yml`) à chaque push sur `main`.
 1. **GitHub → Settings → Pages** : source = **GitHub Actions**.
 2. **GitHub → Settings → Secrets and variables → Actions** : ajouter les
    secrets `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
-3. **Google Cloud Console** : créer un identifiant OAuth 2.0 (Web), récupérer
-   *Client ID* et *Client secret*.
-4. **Supabase → Authentication → Providers → Google** : activer et coller le
-   Client ID / Secret.
-5. **Supabase → Authentication → URL Configuration** :
+3. **Supabase → Authentication → Providers → Email** : activé par défaut.
+   Pour un usage entre amis sans configuration SMTP, **désactiver « Confirm
+   email »** afin que les comptes soient utilisables immédiatement (sinon il
+   faut configurer un SMTP pour l'email de confirmation).
+4. **Supabase → Authentication → URL Configuration** :
    - *Site URL* : `https://ludodwt.github.io/six-cdm/`
-   - *Redirect URLs* : ajouter `https://ludodwt.github.io/six-cdm/` (et
-     `http://localhost:5173/six-cdm/` pour le dev local).
+   - *Redirect URLs* : ajouter `http://localhost:5173/six-cdm/` pour le dev.
 
-Une fois ces étapes faites, la connexion Google et le déploiement fonctionnent.
+L'authentification se fait par **email + mot de passe** (inscription avec un
+pseudo). Une fois ces étapes faites, le déploiement et la connexion fonctionnent.
 
 ## Structure
 
