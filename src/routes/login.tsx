@@ -1,10 +1,34 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { BallLogo } from '@/components/BallLogo'
+
+type AuthErr = { message?: string; code?: string; status?: number }
+
+/** Traduit les erreurs d'auth Supabase en messages clairs en français. */
+function authErrorFr(error: AuthErr): string {
+  const code = error.code ?? ''
+  const msg = (error.message ?? '').toLowerCase()
+  if (code === 'invalid_credentials' || msg.includes('invalid login credentials'))
+    return 'Email ou mot de passe incorrect.'
+  if (
+    code === 'user_already_exists' ||
+    msg.includes('already registered') ||
+    msg.includes('already been registered')
+  )
+    return 'Un compte existe déjà avec cet email — connecte-toi plutôt.'
+  if (code === 'weak_password' || msg.includes('password should be at least'))
+    return 'Mot de passe trop court (6 caractères minimum).'
+  if (code === 'email_not_confirmed' || msg.includes('email not confirmed'))
+    return "Ce compte n'est pas encore confirmé — préviens l'admin."
+  if (error.status === 429 || code.includes('rate_limit') || msg.includes('rate limit'))
+    return 'Trop de tentatives — patiente quelques minutes avant de réessayer.'
+  if (msg.includes('unable to validate email') || msg.includes('invalid email'))
+    return 'Adresse email invalide.'
+  return error.message || 'Une erreur est survenue. Réessaie.'
+}
 
 export function LoginPage() {
   const { session, loading, signUp, signIn } = useAuth()
@@ -14,6 +38,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && session) navigate({ to: '/' })
@@ -21,20 +47,52 @@ export function LoginPage() {
 
   if (loading) return null
 
+  const switchMode = (m: 'login' | 'signup') => {
+    setMode(m)
+    setError(null)
+    setInfo(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setInfo(null)
+
+    // Validation côté client
+    if (mode === 'signup' && displayName.trim().length < 2) {
+      setError('Choisis un pseudo (au moins 2 caractères).')
+      return
+    }
+    if (password.length < 6) {
+      setError('Le mot de passe doit faire au moins 6 caractères.')
+      return
+    }
+
     setBusy(true)
     try {
       if (mode === 'signup') {
-        const { error } = await signUp(email, password, displayName.trim())
-        if (error) throw error
-        toast.success('Compte créé, bienvenue ! ⚽')
+        const { data, error: err } = await signUp(email.trim(), password, displayName.trim())
+        if (err) {
+          setError(authErrorFr(err))
+          return
+        }
+        if (data.session) {
+          // Connecté directement (confirmation email désactivée) → la redirection se fait via l'effet
+          return
+        }
+        // Compte créé mais session absente (confirmation email active)
+        switchMode('login')
+        setInfo('Compte créé ✅ Connecte-toi avec ton email et ton mot de passe.')
       } else {
-        const { error } = await signIn(email, password)
-        if (error) throw error
+        const { error: err } = await signIn(email.trim(), password)
+        if (err) {
+          setError(authErrorFr(err))
+          return
+        }
+        // Succès → redirection via l'effet
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+    } catch {
+      setError('Impossible de joindre le serveur. Vérifie ta connexion.')
     } finally {
       setBusy(false)
     }
@@ -62,12 +120,13 @@ export function LoginPage() {
             </h1>
           </div>
           <p className="max-w-xs text-balance text-muted-foreground">
-            Pronostique chaque match, défie tes amis et grimpe au classement. Que la fête
-            commence ! 🇺🇸 🇲🇽 🇨🇦
+            {mode === 'signup'
+              ? 'Crée ton compte pour rejoindre la partie. 🇺🇸 🇲🇽 🇨🇦'
+              : 'Connecte-toi, pronostique et grimpe au classement. 🇺🇸 🇲🇽 🇨🇦'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-left">
+        <form onSubmit={handleSubmit} noValidate className="space-y-3 text-left">
           {mode === 'signup' && (
             <div className="space-y-1">
               <label htmlFor="displayName" className="text-sm font-medium">
@@ -78,7 +137,6 @@ export function LoginPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Ton nom de joueur"
-                required
                 autoComplete="nickname"
               />
             </div>
@@ -93,7 +151,6 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="toi@exemple.com"
-              required
               autoComplete="email"
             />
           </div>
@@ -106,12 +163,27 @@ export function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
+              placeholder="6 caractères minimum"
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
             />
           </div>
+
+          {error && (
+            <p
+              role="alert"
+              className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+            >
+              {error}
+            </p>
+          )}
+          {info && !error && (
+            <p
+              role="status"
+              className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary"
+            >
+              {info}
+            </p>
+          )}
 
           <Button
             type="submit"
@@ -131,7 +203,7 @@ export function LoginPage() {
           {mode === 'signup' ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
           <button
             type="button"
-            onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
+            onClick={() => switchMode(mode === 'signup' ? 'login' : 'signup')}
             className="font-semibold text-accent underline-offset-4 hover:underline"
           >
             {mode === 'signup' ? 'Se connecter' : 'Créer un compte'}
