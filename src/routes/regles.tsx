@@ -2,7 +2,7 @@ import { Trophy, Target, Lock, Coins, CheckCircle2 } from 'lucide-react'
 import { useBonusQuestions } from '@/hooks/useBonus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { PRIZE_SPLIT, CONTRIB_STEP } from '@/lib/prize'
+import { ENTRY_FEE, PRIZE_TIERS, prizeShares } from '@/lib/prize'
 
 function Example({ pred, real, pts, label }: { pred: string; real: string; pts: string; label: string }) {
   return (
@@ -21,7 +21,6 @@ function Example({ pred, real, pts, label }: { pred: string; real: string; pts: 
 
 export function ReglesPage() {
   const { data: bonusQuestions } = useBonusQuestions()
-  const splitPct = PRIZE_SPLIT.map((p) => Math.round(p * 100))
 
   return (
     <div className="space-y-6">
@@ -121,15 +120,28 @@ export function ReglesPage() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            Participation par tranches de{' '}
-            <span className="font-semibold text-foreground">{CONTRIB_STEP}€</span>. À la fin, la
-            cagnotte est répartie entre les 3 premiers contributeurs au classement général :{' '}
-            <span className="font-semibold text-foreground">
-              {splitPct[0]}% / {splitPct[1]}% / {splitPct[2]}%
-            </span>
-            .
+            <span className="font-semibold text-foreground">{ENTRY_FEE}€ par joueur</span>, et{' '}
+            <span className="font-semibold text-foreground">100% redistribué</span>. Le site est
+            réservé aux joueurs ayant réglé leur participation.
           </p>
-          <p>Seuls les joueurs ayant contribué peuvent remporter une part.</p>
+          <p>
+            <span className="font-medium text-foreground">Plus on est nombreux, plus il y a de
+            gagnants.</span> Répartition selon le nombre de participants :
+          </p>
+          <ul className="space-y-1 pt-1">
+            {PRIZE_TIERS.map((t) => {
+              const example = t.max === Infinity ? Math.max(t.min, 30) : t.max
+              const pct = prizeShares(example).map((s) => `${Math.round(s * 100)}%`)
+              return (
+                <li key={t.min} className="flex justify-between gap-2">
+                  <span>{t.max === Infinity ? `${t.min}+` : `${t.min}–${t.max}`} joueurs</span>
+                  <span className="text-foreground">
+                    {t.winners} gagnants · {pct.join(' / ')}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
         </CardContent>
       </Card>
     </div>

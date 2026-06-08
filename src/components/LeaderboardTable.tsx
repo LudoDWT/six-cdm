@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { prizeFor, formatEuro } from '@/lib/prize'
 import type { Tables } from '@/types/db'
 
 type LeaderboardRow = Tables<'leaderboard'>
@@ -15,6 +16,8 @@ type LeaderboardRow = Tables<'leaderboard'>
 interface Props {
   rows: LeaderboardRow[]
   currentUserId?: string
+  /** Si défini (>0), affiche une colonne « Gain » pour les N premiers (cagnotte). */
+  prizeWinners?: number
 }
 
 const MEDALS = ['🥇', '🥈', '🥉']
@@ -24,7 +27,8 @@ const PODIUM_RING = [
   'ring-festival-orange/60',
 ]
 
-export function LeaderboardTable({ rows, currentUserId }: Props) {
+export function LeaderboardTable({ rows, currentUserId, prizeWinners = 0 }: Props) {
+  const showPrize = prizeWinners > 0
   return (
     <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <Table>
@@ -36,6 +40,7 @@ export function LeaderboardTable({ rows, currentUserId }: Props) {
             <TableHead className="hidden text-right sm:table-cell">Matchs</TableHead>
             <TableHead className="hidden text-right sm:table-cell">Bonus</TableHead>
             <TableHead className="hidden text-right sm:table-cell">Exacts</TableHead>
+            {showPrize && <TableHead className="text-right">Gain</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -85,6 +90,17 @@ export function LeaderboardTable({ rows, currentUserId }: Props) {
                 <TableCell className="hidden text-right tabular-nums text-muted-foreground sm:table-cell">
                   {row.exact_count ?? 0}
                 </TableCell>
+                {showPrize && (
+                  <TableCell className="text-right">
+                    {index < prizeWinners ? (
+                      <span className="rounded-full bg-festival-gold/25 px-2 py-0.5 font-display text-xs tabular-nums">
+                        {formatEuro(prizeFor(index, rows.length))}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             )
           })}
