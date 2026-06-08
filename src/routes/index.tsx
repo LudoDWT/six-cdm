@@ -1,41 +1,59 @@
-import { Link } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
+import { toast } from 'sonner'
 import { useMatches } from '@/hooks/useMatches'
-import { usePredictions } from '@/hooks/usePredictions'
+import { usePredictions, useUpsertPrediction } from '@/hooks/usePredictions'
 import { useLeaderboard } from '@/hooks/useLeaderboard'
 import { useAuth } from '@/hooks/useAuth'
-import { isLocked } from '@/lib/lock'
-import { teamFlag } from '@/lib/flags'
-import { buttonVariants } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Podium } from '@/components/Podium'
+import { MatchCard } from '@/components/MatchCard'
+import type { Tables } from '@/types/db'
+
+const ms = (iso: string) => new Date(iso).getTime()
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString('fr-FR')
+const dayLabel = (iso: string) =>
+  new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
 export function DashboardPage() {
   const { data: matches, isLoading: matchesLoading } = useMatches()
   const { data: predictions, isLoading: predsLoading } = usePredictions()
   const { data: leaderboard, isLoading: lbLoading } = useLeaderboard()
   const { session } = useAuth()
+  const upsert = useUpsertPrediction()
 
-  const isLoading = matchesLoading || predsLoading || lbLoading
   const userId = session?.user.id
+  const isLoading = matchesLoading || predsLoading || lbLoading
 
-  // Matches not locked + without current user prediction, sorted by kickoff, up to 5
-  const upcomingMatches = (() => {
-    if (!matches || !userId) return []
-    const predictedMatchIds = new Set(
-      (predictions ?? []).filter((p) => p.user_id === userId).map((p) => p.match_id),
-    )
-    return matches
-      .filter((m) => !isLocked(m.kickoff_at) && !predictedMatchIds.has(m.id))
-      .slice(0, 5)
-  })()
+  const myPredByMatch = new Map<number, Tables<'predictions'>>()
+  for (const p of predictions ?? []) {
+    if (p.user_id === userId) myPredByMatch.set(p.match_id, p)
+  }
 
-  // Current user rank and total
+  const now = Date.now()
+  const sorted = [...(matches ?? [])].sort((a, b) => ms(a.kickoff_at) - ms(b.kickoff_at))
+  const future = sorted.filter((m) => ms(m.kickoff_at) > now)
+  const nextMatch = future[0] ?? null
+  const nextDayMatches = nextMatch
+    ? future.filter((m) => dayKey(m.kickoff_at) === dayKey(nextMatch.kickoff_at))
+    : []
+  const restOfDay = nextDayMatches.slice(1)
+  const recentMatch = !nextMatch ? sorted[sorted.length - 1] ?? null : null
+
   const myRank = (() => {
     if (!leaderboard || !userId) return null
     const idx = leaderboard.findIndex((r) => r.user_id === userId)
     if (idx === -1) return null
     return { rank: idx + 1, total: leaderboard[idx].total_points ?? 0 }
   })()
+
+  const bet = (matchId: number) => (s: { home: number; away: number }) => {
+    if (!userId) return
+    upsert.mutate(
+      { user_id: userId, match_id: matchId, home_score: s.home, away_score: s.away },
+      {
+        onSuccess: () => toast.success('Prono enregistré', { description: 'Tu peux le modifier jusqu’au coup d’envoi.' }),
+        onError: (e) => toast.error("Échec de l'enregistrement", { description: e.message }),
+      },
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -49,93 +67,77 @@ export function DashboardPage() {
           <h1 className="mt-1 font-display text-4xl leading-none sm:text-5xl">
             Allez, on pronostique !
           </h1>
-          {myRank ? (
-            <p className="mt-3 text-sm text-primary-foreground/80">
-              Tu es <span className="font-semibold text-primary-foreground">#{myRank.rank}</span> au
-              classement avec <span className="font-semibold text-primary-foreground">{myRank.total} pts</span>.
-            </p>
-          ) : (
-            <p className="mt-3 text-sm text-primary-foreground/80">
-              Pas encore classé — fais tes premiers pronos pour démarrer.
-            </p>
-          )}
+          <p className="mt-3 text-sm text-primary-foreground/80">
+            {myRank ? (
+              <>
+                Tu es <span className="font-semibold text-primary-foreground">#{myRank.rank}</span> au
+                classement avec{' '}
+                <span className="font-semibold text-primary-foreground">{myRank.total} pts</span>.
+              </>
+            ) : (
+              <>Pas encore classé — fais tes premiers pronos pour démarrer.</>
+            )}
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border-l-4 border-l-festival-gold pl-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Mon rang</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {lbLoading ? (
-              <span className="text-muted-foreground text-sm">Chargement…</span>
-            ) : myRank ? (
-              <div className="space-y-1">
-                <p className="font-display text-4xl leading-none">#{myRank.rank}</p>
-                <p className="text-sm text-muted-foreground">{myRank.total} pts</p>
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">Pas encore classé</p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Podium */}
+      {!lbLoading && leaderboard && leaderboard.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="font-display text-2xl">
+            Podium
+            <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+          </h2>
+          <Podium rows={leaderboard} currentUserId={userId} />
+        </section>
+      )}
 
-        <Card className="sm:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Accès rapides</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Link to="/matchs" className={buttonVariants({ variant: 'outline', size: 'sm' })}>Matchs</Link>
-            <Link to="/classement" className={buttonVariants({ variant: 'outline', size: 'sm' })}>Classement</Link>
-            <Link to="/bonus" className={buttonVariants({ variant: 'outline', size: 'sm' })}>Bonus</Link>
-          </CardContent>
-        </Card>
-      </div>
-
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl">Prochains matchs à pronostiquer</h2>
+      {/* Prochain match en grand + pari direct sur la journée */}
+      <section className="space-y-4">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm">Chargement…</p>
-        ) : upcomingMatches.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            Tous les prochains matchs ont déjà un prono, ou aucun match à venir.
-          </p>
+          <p className="text-sm text-muted-foreground">Chargement…</p>
+        ) : nextMatch ? (
+          <>
+            <h2 className="font-display text-2xl">
+              Prochain match
+              <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+            </h2>
+            <div className="rounded-2xl bg-primary/5 p-3 ring-2 ring-primary/20 sm:p-4">
+              <MatchCard
+                match={nextMatch}
+                prediction={myPredByMatch.get(nextMatch.id)}
+                onSubmit={bet(nextMatch.id)}
+              />
+            </div>
+
+            {restOfDay.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Pariez aussi sur la journée du {dayLabel(nextMatch.kickoff_at)}
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {restOfDay.map((m) => (
+                    <MatchCard
+                      key={m.id}
+                      match={m}
+                      prediction={myPredByMatch.get(m.id)}
+                      onSubmit={bet(m.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : recentMatch ? (
+          <>
+            <h2 className="font-display text-2xl">
+              Dernier match
+              <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+            </h2>
+            <MatchCard match={recentMatch} prediction={myPredByMatch.get(recentMatch.id)} onSubmit={() => {}} />
+          </>
         ) : (
-          <div className="space-y-2">
-            {upcomingMatches.map((match) => (
-              <Card key={match.id} className="transition-shadow hover:shadow-md hover:shadow-primary/5">
-                <CardContent className="flex items-center justify-between gap-3 py-3">
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 font-medium">
-                      {teamFlag(match.home_team) && <span aria-hidden>{teamFlag(match.home_team)}</span>}
-                      <span className="truncate">{match.home_team}</span>
-                      <span className="text-muted-foreground">vs</span>
-                      {teamFlag(match.away_team) && <span aria-hidden>{teamFlag(match.away_team)}</span>}
-                      <span className="truncate">{match.away_team}</span>
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(match.kickoff_at).toLocaleString('fr-FR', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
-                  <Link
-                    to="/match/$id"
-                    params={{ id: String(match.id) }}
-                    className={buttonVariants({ variant: 'default', size: 'sm' }) + ' shrink-0 gap-1'}
-                  >
-                    Pronostiquer
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <p className="text-sm text-muted-foreground">Aucun match à afficher.</p>
         )}
       </section>
     </div>

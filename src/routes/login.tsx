@@ -118,8 +118,8 @@ export function LoginPage() {
           </div>
           <p className="max-w-xs text-balance text-muted-foreground">
             {mode === 'signup'
-              ? 'Crée ton compte pour rejoindre la partie. 🇺🇸 🇲🇽 🇨🇦'
-              : 'Connecte-toi, pronostique et grimpe au classement. 🇺🇸 🇲🇽 🇨🇦'}
+              ? 'Crée ton compte pour rejoindre la partie.'
+              : 'Connecte-toi, pronostique et grimpe au classement.'}
           </p>
         </div>
 

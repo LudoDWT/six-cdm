@@ -1,10 +1,11 @@
+import { MapPin } from 'lucide-react'
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Countdown } from '@/components/Countdown'
 import { PredictionForm } from '@/components/PredictionForm'
 import { computePoints } from '@/lib/scoring'
 import { matchStageLabel } from '@/lib/stages'
-import { teamFlag } from '@/lib/flags'
+import { Flag } from '@/components/Flag'
 import { cn } from '@/lib/utils'
 import type { Tables } from '@/types/db'
 
@@ -28,7 +29,6 @@ const isFinished = (match: Tables<'matches'>) =>
   match.home_score !== null && match.away_score !== null
 
 function TeamName({ name, align }: { name: string; align: 'start' | 'end' }) {
-  const flag = teamFlag(name)
   return (
     <div
       className={cn(
@@ -36,18 +36,7 @@ function TeamName({ name, align }: { name: string; align: 'start' | 'end' }) {
         align === 'end' && 'flex-row-reverse text-right',
       )}
     >
-      {flag ? (
-        <span aria-hidden className="text-2xl leading-none">
-          {flag}
-        </span>
-      ) : (
-        <span
-          aria-hidden
-          className="grid size-6 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground"
-        >
-          ?
-        </span>
-      )}
+      <Flag team={name} />
       <span className="truncate text-sm font-semibold leading-tight">{name}</span>
     </div>
   )
@@ -131,8 +120,9 @@ export function MatchCard({ match, prediction, onSubmit }: Props) {
       </CardContent>
 
       {!finished && (
-        <CardFooter className="text-xs text-muted-foreground">
-          <span className="truncate">📍 {match.venue}</span>
+        <CardFooter className="gap-1 text-xs text-muted-foreground">
+          <MapPin className="size-3.5 shrink-0" />
+          <span className="truncate">{match.venue}</span>
         </CardFooter>
       )}
     </Card>

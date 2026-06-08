@@ -1,4 +1,5 @@
 import { useParams } from '@tanstack/react-router'
+import { MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMatches } from '@/hooks/useMatches'
 import { usePredictions, useUpsertPrediction } from '@/hooks/usePredictions'
@@ -8,7 +9,7 @@ import { PredictionsTable } from '@/components/PredictionsTable'
 import { Badge } from '@/components/ui/badge'
 import { computePoints } from '@/lib/scoring'
 import { matchStageLabel } from '@/lib/stages'
-import { teamFlag } from '@/lib/flags'
+import { Flag } from '@/components/Flag'
 
 function formatKickoff(iso: string): string {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -70,17 +71,17 @@ export function MatchDetailPage() {
           </Badge>
           <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-3xl leading-none sm:text-4xl">
             <span className="inline-flex items-center gap-2">
-              {teamFlag(match.home_team) && <span aria-hidden>{teamFlag(match.home_team)}</span>}
+              <Flag team={match.home_team} className="h-5 w-7" />
               {match.home_team}
             </span>
             <span className="text-primary-foreground/60">vs</span>
             <span className="inline-flex items-center gap-2">
-              {teamFlag(match.away_team) && <span aria-hidden>{teamFlag(match.away_team)}</span>}
+              <Flag team={match.away_team} className="h-5 w-7" />
               {match.away_team}
             </span>
           </h1>
-          <p className="text-sm text-primary-foreground/80">
-            {formatKickoff(match.kickoff_at)} · 📍 {match.venue}
+          <p className="flex items-center gap-1.5 text-sm text-primary-foreground/80">
+            {formatKickoff(match.kickoff_at)} · <MapPin className="size-3.5" /> {match.venue}
           </p>
         </div>
       </div>

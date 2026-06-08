@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Clock } from 'lucide-react'
 import { formatCountdown } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -20,7 +21,9 @@ export function Countdown({ kickoffIso }: { kickoffIso: string }) {
         urgent && 'font-semibold text-accent',
       )}
     >
-      {urgent && <span className="size-1.5 animate-pulse rounded-full bg-accent" />}⏱ {formatCountdown(remaining)}
+      {urgent && <span className="size-1.5 animate-pulse rounded-full bg-accent" />}
+      <Clock className="size-3.5" />
+      {formatCountdown(remaining)}
     </span>
   )
 }

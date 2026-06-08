@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Toaster } from '@/components/ui/sonner'
 import { BallLogo } from '@/components/BallLogo'
+import { Flag } from '@/components/Flag'
 
 const NAV = [
   { to: '/', label: 'Accueil' },
@@ -108,8 +109,11 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      <footer className="mx-auto w-full max-w-5xl px-4 py-6 text-center text-xs text-muted-foreground">
-        six-cdm · Coupe du Monde 2026 · 🇺🇸 🇲🇽 🇨🇦
+      <footer className="mx-auto flex w-full max-w-5xl items-center justify-center gap-1.5 px-4 py-6 text-center text-xs text-muted-foreground">
+        six-cdm · Coupe du Monde 2026 ·
+        <Flag team="Canada" className="h-3 w-4" />
+        <Flag team="Mexique" className="h-3 w-4" />
+        <Flag team="États-Unis" className="h-3 w-4" />
       </footer>
 
       <Toaster />
