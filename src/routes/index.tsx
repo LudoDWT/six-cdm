@@ -4,14 +4,14 @@ import { usePredictions, useUpsertPrediction } from '@/hooks/usePredictions'
 import { useLeaderboard } from '@/hooks/useLeaderboard'
 import { useBonusQuestions, useBonusPredictions } from '@/hooks/useBonus'
 import { useAuth } from '@/hooks/useAuth'
-import { isLocked } from '@/lib/lock'
+import { parisDateKey } from '@/lib/lock'
 import { Podium } from '@/components/Podium'
 import { MatchCard } from '@/components/MatchCard'
+import { TodayMatchCard } from '@/components/TodayMatchCard'
 import { BonusQuestionCard } from '@/components/BonusQuestionCard'
 import type { Tables } from '@/types/db'
 
 const ms = (iso: string) => new Date(iso).getTime()
-const dayKey = (iso: string) => new Date(iso).toLocaleDateString('fr-FR')
 const dayLabel = (iso: string) =>
   new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -25,30 +25,26 @@ export function DashboardPage() {
   const upsert = useUpsertPrediction()
 
   const userId = session?.user.id
+  const isLoading = matchesLoading || predsLoading
 
-  // Questions bonus encore ouvertes et non répondues par l'utilisateur
-  const myBonusAnswered = new Set(
-    (bonusPredictions ?? []).filter((p) => p.user_id === userId).map((p) => p.bonus_question_id),
-  )
-  const pendingBonus = (bonusQuestions ?? []).filter(
-    (q) => !isLocked(q.lock_at) && !myBonusAnswered.has(q.id),
-  )
-  const isLoading = matchesLoading || predsLoading || lbLoading
-
+  // Pronos : les miens (par match) + tous (pour les tendances)
   const myPredByMatch = new Map<number, Tables<'predictions'>>()
+  const allPredsByMatch = new Map<number, Tables<'predictions'>[]>()
   for (const p of predictions ?? []) {
     if (p.user_id === userId) myPredByMatch.set(p.match_id, p)
+    const arr = allPredsByMatch.get(p.match_id) ?? []
+    arr.push(p)
+    allPredsByMatch.set(p.match_id, arr)
   }
 
-  const now = Date.now()
+  const todayKey = parisDateKey(new Date())
   const sorted = [...(matches ?? [])].sort((a, b) => ms(a.kickoff_at) - ms(b.kickoff_at))
-  const future = sorted.filter((m) => ms(m.kickoff_at) > now)
-  const nextMatch = future[0] ?? null
-  const nextDayMatches = nextMatch
-    ? future.filter((m) => dayKey(m.kickoff_at) === dayKey(nextMatch.kickoff_at))
-    : []
-  const restOfDay = nextDayMatches.slice(1)
-  const recentMatch = !nextMatch ? sorted[sorted.length - 1] ?? null : null
+  const matchDay = (m: Tables<'matches'>) => parisDateKey(new Date(m.kickoff_at))
+
+  const todayMatches = sorted.filter((m) => matchDay(m) === todayKey)
+  const futureDays = [...new Set(sorted.filter((m) => matchDay(m) > todayKey).map(matchDay))].sort()
+  const nextOpenDay = futureDays[0] ?? null
+  const nextDayMatches = nextOpenDay ? sorted.filter((m) => matchDay(m) === nextOpenDay) : []
 
   const myRank = (() => {
     if (!leaderboard || !userId) return null
@@ -57,12 +53,19 @@ export function DashboardPage() {
     return { rank: idx + 1, total: leaderboard[idx].total_points ?? 0 }
   })()
 
+  const myBonusAnswered = new Set(
+    (bonusPredictions ?? []).filter((p) => p.user_id === userId).map((p) => p.bonus_question_id),
+  )
+  const pendingBonus = (bonusQuestions ?? []).filter(
+    (q) => new Date(q.lock_at).getTime() > Date.now() && !myBonusAnswered.has(q.id),
+  )
+
   const bet = (matchId: number) => (s: { home: number; away: number }) => {
     if (!userId) return
     upsert.mutate(
       { user_id: userId, match_id: matchId, home_score: s.home, away_score: s.away },
       {
-        onSuccess: () => toast.success('Prono enregistré', { description: 'Tu peux le modifier jusqu’au coup d’envoi.' }),
+        onSuccess: () => toast.success('Prono enregistré', { description: 'Modifiable jusqu’à la veille du match.' }),
         onError: (e) => toast.error("Échec de l'enregistrement", { description: e.message }),
       },
     )
@@ -105,54 +108,58 @@ export function DashboardPage() {
         </section>
       )}
 
-      {/* Prochain match en grand + pari direct sur la journée */}
+      {/* À parier : matchs du prochain jour */}
       <section className="space-y-4">
+        <div>
+          <h2 className="font-display text-2xl">À parier</h2>
+          <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+          {nextOpenDay && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Matchs du <span className="font-medium capitalize text-foreground">{dayLabel(nextDayMatches[0].kickoff_at)}</span>
+              {' '}— modifiables jusqu'à la veille au soir.
+            </p>
+          )}
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Chargement…</p>
-        ) : nextMatch ? (
-          <>
-            <h2 className="font-display text-2xl">
-              Prochain match
-              <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
-            </h2>
-            <div className="rounded-2xl bg-primary/5 p-3 ring-2 ring-primary/20 sm:p-4">
-              <MatchCard
-                match={nextMatch}
-                prediction={myPredByMatch.get(nextMatch.id)}
-                onSubmit={bet(nextMatch.id)}
-              />
-            </div>
-
-            {restOfDay.length > 0 && (
-              <div className="space-y-3 pt-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Pariez aussi sur la journée du {dayLabel(nextMatch.kickoff_at)}
-                </h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {restOfDay.map((m) => (
-                    <MatchCard
-                      key={m.id}
-                      match={m}
-                      prediction={myPredByMatch.get(m.id)}
-                      onSubmit={bet(m.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        ) : recentMatch ? (
-          <>
-            <h2 className="font-display text-2xl">
-              Dernier match
-              <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
-            </h2>
-            <MatchCard match={recentMatch} prediction={myPredByMatch.get(recentMatch.id)} onSubmit={() => {}} />
-          </>
+        ) : nextDayMatches.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucun match à parier pour le moment.</p>
         ) : (
-          <p className="text-sm text-muted-foreground">Aucun match à afficher.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {nextDayMatches.map((m) => (
+              <MatchCard
+                key={m.id}
+                match={m}
+                prediction={myPredByMatch.get(m.id)}
+                onSubmit={bet(m.id)}
+              />
+            ))}
+          </div>
         )}
       </section>
+
+      {/* Matchs du jour : verrouillés, avec tendances */}
+      {todayMatches.length > 0 && (
+        <section className="space-y-4">
+          <div>
+            <h2 className="font-display text-2xl">Aujourd'hui</h2>
+            <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Paris verrouillés — voici les tendances des joueurs.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {todayMatches.map((m) => (
+              <TodayMatchCard
+                key={m.id}
+                match={m}
+                myPrediction={myPredByMatch.get(m.id)}
+                allPredictions={allPredsByMatch.get(m.id) ?? []}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Bonus tournoi non répondus */}
       {userId && pendingBonus.length > 0 && (
