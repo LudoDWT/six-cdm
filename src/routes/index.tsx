@@ -2,9 +2,12 @@ import { toast } from 'sonner'
 import { useMatches } from '@/hooks/useMatches'
 import { usePredictions, useUpsertPrediction } from '@/hooks/usePredictions'
 import { useLeaderboard } from '@/hooks/useLeaderboard'
+import { useBonusQuestions, useBonusPredictions } from '@/hooks/useBonus'
 import { useAuth } from '@/hooks/useAuth'
+import { isLocked } from '@/lib/lock'
 import { Podium } from '@/components/Podium'
 import { MatchCard } from '@/components/MatchCard'
+import { BonusQuestionCard } from '@/components/BonusQuestionCard'
 import type { Tables } from '@/types/db'
 
 const ms = (iso: string) => new Date(iso).getTime()
@@ -16,10 +19,20 @@ export function DashboardPage() {
   const { data: matches, isLoading: matchesLoading } = useMatches()
   const { data: predictions, isLoading: predsLoading } = usePredictions()
   const { data: leaderboard, isLoading: lbLoading } = useLeaderboard()
+  const { data: bonusQuestions } = useBonusQuestions()
+  const { data: bonusPredictions } = useBonusPredictions()
   const { session } = useAuth()
   const upsert = useUpsertPrediction()
 
   const userId = session?.user.id
+
+  // Questions bonus encore ouvertes et non répondues par l'utilisateur
+  const myBonusAnswered = new Set(
+    (bonusPredictions ?? []).filter((p) => p.user_id === userId).map((p) => p.bonus_question_id),
+  )
+  const pendingBonus = (bonusQuestions ?? []).filter(
+    (q) => !isLocked(q.lock_at) && !myBonusAnswered.has(q.id),
+  )
   const isLoading = matchesLoading || predsLoading || lbLoading
 
   const myPredByMatch = new Map<number, Tables<'predictions'>>()
@@ -140,6 +153,27 @@ export function DashboardPage() {
           <p className="text-sm text-muted-foreground">Aucun match à afficher.</p>
         )}
       </section>
+
+      {/* Bonus tournoi non répondus */}
+      {userId && pendingBonus.length > 0 && (
+        <section className="space-y-4">
+          <div>
+            <h2 className="font-display text-2xl">
+              Bonus à compléter
+              <span className="festival-rule mt-2 block h-1 w-16 rounded-full" />
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Les paris bonus doivent être validés{' '}
+              <span className="font-semibold text-foreground">au plus tard le 14 juin à 23h59</span>.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pendingBonus.map((q) => (
+              <BonusQuestionCard key={q.id} question={q} initialAnswer="" userId={userId} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -1,73 +1,6 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { useBonusQuestions, useBonusPredictions, useUpsertBonus } from '@/hooks/useBonus'
+import { useBonusQuestions, useBonusPredictions } from '@/hooks/useBonus'
 import { useAuth } from '@/hooks/useAuth'
-import { isLocked } from '@/lib/lock'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-
-function BonusQuestionCard({
-  question,
-  initialAnswer,
-  userId,
-}: {
-  question: { id: number; label: string; lock_at: string; points: number; correct_answer: string | null }
-  initialAnswer: string
-  userId: string
-}) {
-  const [answer, setAnswer] = useState(initialAnswer)
-  const upsert = useUpsertBonus()
-  const locked = isLocked(question.lock_at)
-
-  function handleSubmit() {
-    upsert.mutate(
-      { user_id: userId, bonus_question_id: question.id, answer },
-      {
-        onSuccess: () => toast.success('Réponse enregistrée 🎯'),
-        onError: (err) =>
-          toast.error(`Erreur : ${err instanceof Error ? err.message : 'inconnue'}`),
-      },
-    )
-  }
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base font-medium">{question.label}</CardTitle>
-          <Badge className="bg-festival-gold font-display text-foreground">+{question.points} pts</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex gap-2">
-          <Input
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            disabled={locked}
-            placeholder={locked ? 'Verrouillé' : 'Votre réponse…'}
-            className="flex-1"
-          />
-          {!locked && (
-            <Button
-              onClick={handleSubmit}
-              disabled={upsert.isPending || answer.trim() === ''}
-              size="sm"
-            >
-              Valider
-            </Button>
-          )}
-        </div>
-        {question.correct_answer != null && (
-          <p className="text-sm text-muted-foreground">
-            Bonne réponse : <span className="font-medium text-foreground">{question.correct_answer}</span>
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
+import { BonusQuestionCard } from '@/components/BonusQuestionCard'
 
 export function BonusPage() {
   const { data: questions, isLoading: qLoading, error: qError } = useBonusQuestions()
@@ -107,7 +40,8 @@ export function BonusPage() {
         <h1 className="font-display text-4xl leading-none">Questions Bonus</h1>
         <div className="festival-rule mt-2 h-1 w-16 rounded-full" />
         <p className="mt-2 text-sm text-muted-foreground">
-          Des points en plus pour les pronos audacieux. 🎯
+          Des points en plus pour les pronos audacieux — à valider{' '}
+          <span className="font-semibold text-foreground">au plus tard le 14 juin à 23h59</span>.
         </p>
       </div>
       {(questions ?? []).length === 0 ? (
