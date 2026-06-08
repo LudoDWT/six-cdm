@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/sonner'
 
 export function AppLayout() {
   const { session, loading, signOut } = useAuth()
@@ -29,6 +30,7 @@ export function AppLayout() {
       <main className="mx-auto max-w-5xl p-4">
         <Outlet />
       </main>
+      <Toaster />
     </div>
   )
 }
